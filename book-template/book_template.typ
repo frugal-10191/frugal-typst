@@ -28,51 +28,6 @@
 
 
 
-#let part(title) = {
-  pagebreak()
-  pagebreak(to: "odd", weak: true)
-  
-  locate(loc => [
-    #let colour = state_main_colour.at(loc)
-    #let titleFont = state_title_font.at(loc)
-    #page(fill: colour)[
-      #part_number.step()
-      #set text(font: titleFont, size: 48pt, weight: "bold")
-      #smallcaps([
-        Part: #part_number.display() \
-        #text(title)
-        <part>
-      ])
-    ]
-  ])
-  pagebreak()
-}
-
-/*
-#let part(title) = {
-  pagebreak()
-  pagebreak(to: "odd", weak: true)
-  
-  locate(loc => [
-    #let colour = state_main_colour.at(loc)
-    #page(fill: colour.lighten(70%))[
-      #part_number.step()
-
-      // Display the part number in big text
-      #place(top+left)[
-        #block(text(font: "DM Sans", fill: colour, size: 288pt, weight: "black", part_number.display("I")))
-        #v(1cm, weak: true)
-        #move(dx: -4pt, block(text(fill: colour, size: 6em, weight: "bold", title)))
-
-      ]
-    ]
-  ])
-  pagebreak()
-}
-*/
-
-
-
 
 // Outline/introduction
 #let my-outline-row( textSize:none,
@@ -95,63 +50,164 @@
 }
 
 
-#let show_outline =  {
-    show outline.entry: it => {
-      let counterInt = counter(heading).at(it.element.location())
-      let number = none
-      if counterInt.first() >0 {
-        number = numbering("1.1", ..counterInt)
-      }
-      let title = it.element.body
-      let heading_page = it.page
-      let colour = state_main_colour.at(it.element.location())
-      let headingFont = state_heading_font.at(it.element.location())
-      if it.level == 1 {
-        v(1em, weak: true)
-        my-outline-row(insetSize: 2pt, textWeight: "bold", textSize: 18pt, textFont: headingFont, textColor: colour, title: title, 
-                       heading_page: heading_page, number: number, target: it.element.location())
-      }
-      else if it.level == 2 {
-        my-outline-row(insetSize: 2pt, textWeight: "bold", textSize: 14pt, textFont: headingFont, textColor:black, title: title, 
-                       heading_page: heading_page, number: number, target: it.element.location())
+#let partOutline() = {
+  show outline.entry: it => {
+    let counterInt = counter(heading).at(it.element.location())
+    let number = none
+    if counterInt.first() >0 {
+      number = numbering("1.1", ..counterInt)
+    }
+    let title = it.element.body
+    let heading_page = it.page
+    let colour = state_main_colour.at(it.element.location())
+    let headingFont = state_heading_font.at(it.element.location())
+    let textWeight = "regular"
+    let textSize = 1em
+    let textColour = black
+    if it.level == 1 {
+      v(1em, weak: true)
+      textWeight = "bold"
+      textSize = 1.1em
+      textColour = colour
+    }
+    else if it.level == 2 {
+      textWeight = "bold"
+      textSize = 1.0em
+    }
+    my-outline-row(insetSize: 2pt, 
+                    textWeight: textWeight, 
+                    textSize: textSize, 
+                    textFont: headingFont, 
+                    textColor:textColour, 
+                    title: title, 
+                    heading_page: heading_page, 
+                    number: number, 
+                    target: it.element.location())
+    }  
+
+  locate(loc2 => [ 
+    #let parts = query(<part>, loc2)
+    #let currPartNo = part_number.at(loc2).first()
+    #if parts.len() > 0 {
+      if parts.len() > currPartNo {
+        let from = parts.at(currPartNo - 1).location()
+        let to = parts.at(currPartNo).location()
+        //part-title(from, parts.at(currPartNo).text)
+        align(bottom + right, block(width: 12cm, outline(title: none, target: selector(heading).after(from).before(to))))
       }
       else {
-        my-outline-row(insetSize: 2pt, textWeight: "regular", textSize: 12pt, textFont: headingFont, textColor:black, title: title, 
-                       heading_page: heading_page, number: number, target: it.element.location())        
+        align(bottom + right, block(width: 12cm, outline(title: none, target: selector(heading).after(parts.last().location()))))
       }
-    }
-    set outline(indent: false)
-    //set page(numbering: "i")
-    
-    
-    let part-title(loc, part_title) = link(loc)[
-      #let colour = state_main_colour.at(loc)
-      #let titleFont = state_title_font.at(loc)
-      #v(0.7cm, weak: true)
-      #box(width:100%, {
-        box(width: 1.1cm, fill: colour.lighten(80%), inset: 5pt, align(
-            center, text(font: titleFont, size: 24pt, weight: "bold", fill: colour.lighten(30%), numbering("I", counter(<part>).at(loc).first())))) 
-        h(0.1cm) 
-        box(width: 100% - 1.2cm, fill: colour.lighten(60%), inset: 5pt, align(center, text(font: titleFont, size: 24pt, weight: "bold", part_title)))
-      })
-      #v(0.45cm, weak: true)
-    ]
 
-    heading(numbering: none, outlined: false, bookmarked: false, "Table of Contents")
-    
-    // Make each part have its own outline
-    locate(loc => {
-      let elems = query(<part>, loc)
-      for i in range(0, elems.len()-1) {
-        let from = elems.at(i).location()
-        let to = elems.at(i+1).location()
-        part-title(from, elems.at(i).text)
+    }
+  ])
+}
+
+#let part(title) = {
+  pagebreak(to: "odd", weak: true)
+  
+  locate(loc => [
+    #let colour = state_main_colour.at(loc)
+    #let titleFont = state_title_font.at(loc)
+    #page(fill: colour.lighten(70%))[
+      #part_number.step()
+      #block()[
+
+        #set text(font: titleFont, size: 48pt, weight: "bold")
+        #smallcaps([
+          Part: #part_number.display() \
+          #text(title)
+          <part>
+        ])
+      ]
+
+      #partOutline()
+    ]
+  ])
+  pagebreak()
+}
+
+
+
+
+
+
+
+
+#let show_outline =  {
+  show outline.entry: it => {
+    let counterInt = counter(heading).at(it.element.location())
+    let number = none
+    if counterInt.first() >0 {
+      number = numbering("1.1", ..counterInt)
+    }
+    let title = it.element.body
+    let heading_page = it.page
+    let colour = state_main_colour.at(it.element.location())
+    let headingFont = state_heading_font.at(it.element.location())
+    let textWeight = "regular"
+    let textSize = 1em
+    let textColour = black
+    if it.level == 1 {
+      v(1em, weak: true)
+      textWeight = "bold"
+      textSize = 1.3em
+      textColour = colour
+    }
+    else if it.level == 2 {
+      textWeight = "bold"
+      textSize = 1.2em
+    }
+    my-outline-row(insetSize: 2pt, 
+                    textWeight: textWeight, 
+                    textSize: textSize, 
+                    textFont: headingFont, 
+                    textColor:textColour, 
+                    title: title, 
+                    heading_page: heading_page, 
+                    number: number, 
+                    target: it.element.location())        
+  }
+  set outline(indent: false)
+  //set page(numbering: "i")
+  
+  // A custom outline level for parts are they are not included in the
+  // normal numbering system
+  let part-title(loc, part_title) = link(loc)[
+    #let colour = state_main_colour.at(loc)
+    #let titleFont = state_title_font.at(loc)
+    #v(0.7cm, weak: true)
+    #box(width:100%, {
+      box(width: 1.1cm, fill: colour.lighten(80%), inset: 5pt, align(
+          center, text(font: titleFont, size: 24pt, weight: "bold", fill: colour.lighten(30%), numbering("I", counter(<part>).at(loc).first())))) 
+      h(0.1cm) 
+      box(width: 100% - 1.2cm, fill: colour.lighten(60%), inset: 5pt, align(center, text(font: titleFont, size: 24pt, weight: "bold", part_title)))
+    })
+    #v(0.45cm, weak: true)
+  ]
+
+
+  // Display the outline, title first, then contents
+  heading(numbering: none, outlined: false, bookmarked: false, "Table of Contents")
+  
+  // Make each part have its own outline
+  locate(loc => {
+    let parts = query(<part>, loc)
+    if parts.len()>0 {
+      for i in range(0, parts.len()-1) {
+        let from = parts.at(i).location()
+        let to = parts.at(i+1).location()
+        part-title(from, parts.at(i).text)
         outline(title: none, target: selector(heading).after(from).before(to))
       }
-      part-title(elems.last().location(), elems.last().text)
-      outline(title: none, target: selector(heading).after(elems.last().location()))
-    })
-  }
+      part-title(parts.last().location(), parts.last().text)
+      outline(title: none, target: selector(heading).after(parts.last().location()))
+    }
+    else {
+      outline(title: none)
+    }
+  })
+}
 
   
 
@@ -214,8 +270,10 @@
 
       // Are we on a page that starts a part? 
       let parts = query(<part>, loc)
-      if parts.any(it => it.location().page() == page_number) {
-        return
+      if parts.len() > 0 {
+        if parts.any(it => it.location().page() == page_number) {
+          return
+        }
       }
 
       // Get the array of chapters (level 1 headings) that have occured before this point
@@ -229,15 +287,24 @@
         // Current chapter number
         let mostRecentChapterPage = chapters.last().location().page()
 
-        let parts = query(selector(<part>).before(loc), loc)
+        let prevParts = query(selector(<part>).before(loc), loc)
         let mostRecentPartPage = 0
-        if parts.len()>0 {
-          mostRecentPartPage = parts.last().location().page()
-          if mostRecentChapterPage > mostRecentPartPage {
-            heading_text = text(weight: "bold", 
-                chapters.last().supplement + " " + str(mostRecentChapter) + ". " + chapters.last().body
-            )            
+        if parts.len() > 0 {
+          if prevParts.len()>0 {
+            mostRecentPartPage = prevParts.last().location().page()
+            if mostRecentChapterPage > mostRecentPartPage {
+              heading_text = text(weight: "bold", 
+                  chapters.last().supplement + " " + str(mostRecentChapter) + ". " + chapters.last().body
+              )            
+            }
           }
+        }
+        else {
+          // this document has no parts
+          heading_text = text(weight: "bold", 
+                              chapters.last().supplement + " " + str(mostRecentChapter) + ". " + chapters.last().body
+          )
+
         }
         
       }
@@ -333,8 +400,6 @@
     supplement: supplementChapter
   );
 
-
-
   // Now we write the document
   //
   //
@@ -374,7 +439,7 @@
     leading: leading
   )
   //show par: set block(spacing: 3.0em) // set the spacing between paragraphs
-  show par: set block(above: 3.0em, below: 3em) // set the spacing between paragraphs
+  show par: set block(above: 1em, below: 2em) // set the spacing between paragraphs
 
   // Set the numbering format for numbered lists
   set enum(numbering: "1.a.i.")
@@ -386,13 +451,15 @@
 
   // Show the copyright if one exists on a page of it's own
   // If there is no copyright then show a blank page.
-  if (copyright!=none){
+  if (copyright!=none) {
     set text(size: 10pt)
     show link: it => [
       #set text(fill: mainColor)
       #it
     ]
-    show par: set block(spacing: 2em)
+    show par: it => {
+      block(above: 2em, below: 2em, it)
+    }
     pagebreak()
     align(bottom, copyright)
   } else {

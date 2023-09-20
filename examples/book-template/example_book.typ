@@ -1,11 +1,11 @@
 #import("/book-template/book_template.typ"): book, part, setChapterImage
 
 #show: book.with(
-  title: "Exploring the Physical Manifestation of Humanity’s Subconscious Desires",
-  subtitle: "A Practical Guide",
-  author: "Goro Akechi",
-  titleFont: "Berlin Sans FB",
-  headingFont: "Berlin Sans FB",
+  title: "Typst Book Template Example",
+  subtitle: "now with parts",
+  author: "Frugal",
+  titleFont: "Lato",
+  headingFont: "Lato",
   bodyFont: "Gentium Plus",
   fontSize: 12pt,
   leading: 0.65em,
@@ -13,11 +13,11 @@
   logo: "/examples/book-template/vecteezy_free-vector-flat-graphic-designer-logo-collection_18716372.svg",
   mainColor: rgb("#799a9c"),
   copyright: [
-    Copyright © 2023 Flavio Barisi
+    Copyright © 2023 Frugal
 
     PUBLISHED BY PUBLISHER
 
-    #link("https://github.com/flavio20002/typst-orange-template", "TEMPLATE-WEBSITE")
+    #link("https://github.com/frugal-10191/frugal-typst", "TEMPLATE-WEBSITE")
 
     Licensed under the Apache 2.0 License (the “License”).
     You may not use this file except in compliance with the License. You may obtain a copy of
@@ -30,10 +30,12 @@
 
     Title background using assets from Freepik.com
 
-    Chapter Images and design insipration from the LaTeX Legrand Orange Book: 
+    Design insipration from the LaTeX Legrand Orange Book: 
     https://www.latextemplates.com/template/legrand-orange-book
 
-    _First printing, July 2023_
+    Original Typst design based on: https://github.com/flavio20002/typst-orange-template
+
+    _First printing, September 2023_
   ]
 )
 
@@ -43,7 +45,7 @@ This is the preamble to part 1
 
 #lorem(243)
 
-#setChapterImage(image("orange1.jpg"))
+#setChapterImage(image("blue1.jpg"))
 = Introduction
 
 #lorem(50)
@@ -59,11 +61,18 @@ This is the preamble to part 1
 
 #lorem(50)
 
+$ A = pi r^2 \
+ "area" = pi dot "radius"^2 $
+$ cal(A) :=
+    { x in RR | x "is natural" } $
+#let x = 5
+$ #x < 17 $
+
 #lorem(320)
 
 #lorem(150)
 
-#setChapterImage(image("orange2.jpg"))
+#setChapterImage(image("blue2.jpg"))
 = Research Objectives
 
 #lorem(50)
@@ -100,7 +109,7 @@ This is the preamble to part 1
 
 #lorem(97)
 
-#setChapterImage(image("orange3.jpg"))
+#setChapterImage(image("blue3.jpg"))
 = Results
 
 #lorem(50)
